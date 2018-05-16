@@ -49,4 +49,5 @@ dbdiff -diff_type=doc
 ```
 
 * bugs
+
 not detect column rename in schema diff mode. make drop and add column script 
