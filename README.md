@@ -47,3 +47,6 @@ dbdiff -diff_type=doc
   -exclude="test_"    // exclude db object name containing test_  
   -output="[DATE]/output.sql"   // create today date folder
 ```
+
+* bugs
+not detect column rename in schema diff mode. make drop and add column script 
