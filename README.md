@@ -39,6 +39,7 @@ dbdiff -diff_type=doc
   -source="uid:pwd@tcp(server_ip:port)/dbname"
   -output=output.md
 ```
+-- output md file convert to pdf ==> ( https://github.com/jaksal/md2pdf )
 
 * extra option
 
