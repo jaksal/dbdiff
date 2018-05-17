@@ -46,6 +46,7 @@ dbdiff -diff_type=doc
   -include="test_"    // include db object name containing test_  
   -exclude="test_"    // exclude db object name containing test_  
   -output="[DATE]/output.sql"   // create today date folder
+  -ignore_column=update_date  // ignore column in data diff mode
 ```
 
 * bugs
