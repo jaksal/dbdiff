@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 )
 
 // Column : mysql Column desc.
@@ -398,13 +399,16 @@ func (t *Table) compare(d *Table) string {
 		return ""
 	}
 
-	result := fmt.Sprintf("ALTER TABLE %s ", t.Name)
-	for i, u := range updates {
-		if i != 0 {
-			result += ", "
+	result := fmt.Sprintf("ALTER TABLE %s\n\t", t.Name)
+	result += strings.Join(updates, ",\n\t")
+	/*
+		for i, u := range updates {
+			if i != 0 {
+				result += ", "
+			}
+			result += u
 		}
-		result += u
-	}
+	*/
 	return result + ";"
 }
 
