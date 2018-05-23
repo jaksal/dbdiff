@@ -3,6 +3,8 @@ dbdiff
 
 create mysql schema and data diff script
 
+mysql database 를 비교하여 스키마 및 데이터 변경사항을 sql 로 추출해주는 툴입니다. 
+
 install :
 -------------
 
@@ -50,6 +52,9 @@ dbdiff -diff_type=doc
   -ignore_column=update_date  // ignore column in data diff mode
 ```
 
-* bugs
+* bug
+
+테이블 비교시 컬럼이름만 변경된 경우는 sql 만으로 알수가 없어서 해당컬럼을 drop 하고 새로 추가합니다. 
+이 과정에서 데이터가 유실되니 이부분 유의해주시기 바랍니다.
 
 not detect column rename in schema diff mode. make drop and add column script 
