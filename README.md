@@ -1,9 +1,11 @@
 dbdiff
 ======
 
-create mysql schema and data diff script
+create mysql schema and data diff script.
+create markdown schema document.
 
 mysql database 를 비교하여 스키마 및 데이터 변경사항을 sql 로 추출해주는 툴입니다. 
+스키마 문서를 md 파일로 생성하는 기능도 있습니다.
 
 install :
 -------------
@@ -41,6 +43,7 @@ dbdiff -diff_type=doc
   -source="uid:pwd@tcp(server_ip:port)/dbname"
   -output=output.md
 ```
+-- 샘플파일은 sample 폴더에 있습니다. 
 -- output md file convert to pdf ==> ( https://github.com/jaksal/md2pdf )
 
 * extra option
