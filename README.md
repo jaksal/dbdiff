@@ -4,8 +4,11 @@ dbdiff
 create mysql schema and data diff script.
 create markdown schema document.
 
-mysql database 를 비교하여 스키마 및 데이터 변경사항을 sql 로 추출해주는 툴입니다. 
+mysql database 를 비교하여 스키마 및 데이터 변경사항을 sql 로 추출해주는 툴입니다.
+
 스키마 문서를 md 파일로 생성하는 기능도 있습니다.
+
+golang으로 작성되어 어느 OS에서도 빌드해서 사용가능합니다.
 
 install :
 -------------
