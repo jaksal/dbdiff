@@ -30,7 +30,7 @@ dbdiff -diff_type=schema
   -output=output.sql
 ```
 
-* create data diff scirpt
+* create data diff scirpt ( 비교할려는 테이블의 스키마가 동일해야만 정상적으로 동작합니다 )
 
 ```
 dbdiff -diff_type=data
