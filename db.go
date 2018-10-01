@@ -158,7 +158,7 @@ var reg6 = regexp.MustCompile("ROW_FORMAT=[^ ]* ")
 
 func ignoreDefiner(result string) string {
 	result = reg1.ReplaceAllString(result, "")
-	result = reg2.ReplaceAllString(result, "")
+	// result = reg2.ReplaceAllString(result, "")
 	result = reg3.ReplaceAllString(result, "")
 	result = reg4.ReplaceAllString(result, "")
 	result = reg5.ReplaceAllString(result, "")
@@ -194,7 +194,7 @@ func (d *DB) GetScript(objectType ObjectType, objectName string) (string, error)
 		return "", errors.New("not found data")
 	}
 
-	//log.Println(data[0])
+	// log.Println(data[0])
 
 	var result string
 	switch objectType {

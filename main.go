@@ -290,169 +290,236 @@ func main() {
 		defer out.Close(true)
 
 		out.Printf("-- Create Date : %s --\n", time.Now().Format("2006-01-02T15:04:05"))
-		out.Println("# Schema : ", srcDB.DBName)
-
-		// set table list table.
-		out.Println("## Tables")
-		out.Println("name | comments")
-		out.Println(":--- | :---")
 
 		// get table list.
 		srcTableNames, err := srcDB.GetObjectList(TABLE, conf.Include, conf.Exclude)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		var srcTables []*Table
-		for _, t := range srcTableNames {
-			srcTable := srcDB.GetTableInfo(t)
-			if srcTable == nil {
-				log.Fatal("load table info error", err)
-			}
-			out.Printf("[%s](#%s) | %s\n", srcTable.Name, MDReplace(srcTable.Name), srcTable.Comment)
-
-			srcTables = append(srcTables, srcTable)
-		}
-		out.Println("<div style='page-break-after: always;'></div>")
-		out.Printf("\n\n---\n")
-
-		// set view list table.
-		out.Println("## Views")
-		out.Println("name |")
-		out.Println(":--- |")
 		// get view list..
 		srcViewNames, err := srcDB.GetObjectList(VIEW, conf.Include, conf.Exclude)
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, v := range srcViewNames {
-			out.Printf("[%s](#%s) |\n", v, MDReplace(v))
-		}
-		out.Println("<div style='page-break-after: always;'></div>")
-		out.Printf("\n\n---\n")
-
-		// set function list.
-		// set table list table.
-		out.Println("## Functions")
-		out.Println("name | comments")
-		out.Println(":--- | :---")
 		srcFunctionNames, err := srcDB.GetObjectList(FUNCTION, conf.Include, conf.Exclude)
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, f := range srcFunctionNames {
-			out.Printf("[%s](#%s) | %s\n", f, MDReplace(f), srcDB.GetObjectComments(FUNCTION, f))
-		}
-		out.Println("<div style='page-break-after: always;'></div>")
-		out.Printf("\n\n---\n")
-
-		// set procedure list.
-		out.Println("## Procedures")
-		out.Println("name | comments")
-		out.Println(":--- | :---")
 		srcProcedureNames, err := srcDB.GetObjectList(PROCEDURE, conf.Include, conf.Exclude)
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, p := range srcProcedureNames {
-			out.Printf("[%s](#%s) | %s\n", p, MDReplace(p), srcDB.GetObjectComments(PROCEDURE, p))
-		}
-		out.Println("<div style='page-break-after: always;'></div>")
-		out.Printf("\n\n---\n")
 
-		// generate table.
-		{
-			// detail table ..
-			for _, srcTable := range srcTables {
-				out.Printf("## %s\n", srcTable.Name)
-				out.Printf("> Comment : %s  \n", srcTable.Comment)
-				out.Printf("> Engine : %s  \n", srcTable.Engine)
-				out.Printf("> Collation : %s  \n\n", srcTable.Collation)
+		if conf.DiffType == "sql" {
+			// output sql file
+			out.Printf("-- DB : %s\n\n", srcDB.DBName)
 
-				// print column..
-				out.Println("Columns")
-				out.Println("name | type | null | default | extra | comment")
-				out.Println(":--- | :--- | :--- | :--- | :--- | :---")
-				for i := 0; i < len(srcTable.Cols); i++ {
-					col := srcTable.GetColumn(i)
-					out.Printf("%s | %s | %s | %s | %s | %s\n", col.Name, col.Type, col.Null, col.Default, col.Extra, col.Comment)
+			// generate table.
+			{
+				// detail table ..
+				for _, srcTable := range srcTableNames {
+					out.Printf("-- %s\n", srcTable)
+					script, err := srcDB.GetScript(TABLE, srcTable)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script + ";")
+					out.Printf("\n\n")
 				}
-				// print index.
-				out.Println("Indexs")
-				out.Println("name | columns | isnull")
-				out.Println(":--- | :--- | :---")
-				for _, idx := range srcTable.Indexs {
-					out.Printf("%s | %s | %t \n", idx.Name, strings.Join(idx.Cols, ","), idx.IsUnique)
-				}
-				out.Println("Create Script")
-				out.Println("```sql")
-				script, err := srcDB.GetScript(TABLE, srcTable.Name)
-				if err != nil {
-					log.Fatal(err)
-				}
-				out.Println(script)
-				out.Printf("```\n")
-				out.Println("[goto table list...](#tables)")
-				out.Println("<div style='page-break-after: always;'></div>")
-				out.Printf("\n\n")
 			}
-		}
 
-		// generate view
-		{
+			// generate view
+			{
+				for _, v := range srcViewNames {
+					out.Printf("-- %s\n", v)
+					script, err := srcDB.GetScript(VIEW, v)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script + ";")
+					out.Printf("\n\n")
+				}
+			}
+
+			// generate function
+			{
+				for _, f := range srcFunctionNames {
+					out.Printf("-- %s\n", f)
+					out.Println("DELIMITER //")
+					script, err := srcDB.GetScript(FUNCTION, f)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script + "//")
+					out.Println("DELIMITER ;")
+					out.Printf("\n\n")
+				}
+			}
+
+			// generate procedure
+			{
+				for _, p := range srcProcedureNames {
+					out.Printf("-- %s\n", p)
+					out.Println("DELIMITER //")
+					script, err := srcDB.GetScript(PROCEDURE, p)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script + "//")
+					out.Println("DELIMITER ;")
+					out.Printf("\n\n")
+				}
+			}
+
+		} else {
+			// output md file.
+			out.Println("# Schema : ", srcDB.DBName)
+
+			// set table list table.
+			out.Println("## Tables\n")
+			out.Println("name | comments")
+			out.Println(":--- | :---")
+
+			var srcTables []*Table
+			for _, t := range srcTableNames {
+				srcTable := srcDB.GetTableInfo(t)
+				if srcTable == nil {
+					log.Fatal("load table info error", err)
+				}
+				out.Printf("[%s](#%s) | %s\n", srcTable.Name, MDReplace(srcTable.Name), srcTable.Comment)
+
+				srcTables = append(srcTables, srcTable)
+			}
+			out.Println("<div style='page-break-after: always;'></div>")
+			out.Printf("\n\n---\n")
+
+			// set view list table.
+			out.Println("## Views\n")
+			out.Println("name |")
+			out.Println(":--- |")
+
 			for _, v := range srcViewNames {
-				out.Printf("## %s\n\n\n", v)
-				out.Println("Create Script")
-				out.Println("```sql")
-				script, err := srcDB.GetScript(VIEW, v)
-				if err != nil {
-					log.Fatal(err)
-				}
-				out.Println(script)
-				out.Printf("```\n")
-				out.Println("[goto view list...](#views)")
-				out.Println("<div style='page-break-after: always;'></div>")
-				out.Printf("\n\n")
+				out.Printf("[%s](#%s) |\n", v, MDReplace(v))
 			}
-		}
+			out.Println("<div style='page-break-after: always;'></div>")
+			out.Printf("\n\n---\n")
 
-		// generate function
-		{
+			// set function list.
+			// set table list table.
+			out.Println("## Functions\n")
+			out.Println("name | comments")
+			out.Println(":--- | :---")
+
 			for _, f := range srcFunctionNames {
-				out.Printf("## %s\n", f)
-				out.Printf("> Comment : %s  \n\n\n", srcDB.GetObjectComments(FUNCTION, f))
-				out.Println("Create Script")
-				out.Println("```sql")
-				script, err := srcDB.GetScript(FUNCTION, f)
-				if err != nil {
-					log.Fatal(err)
-				}
-				out.Println(script)
-				out.Printf("```\n")
-				out.Println("[goto function list...](#functions)")
-				out.Println("<div style='page-break-after: always;'></div>")
-				out.Printf("\n\n")
+				out.Printf("[%s](#%s) | %s\n", f, MDReplace(f), srcDB.GetObjectComments(FUNCTION, f))
 			}
-		}
+			out.Println("<div style='page-break-after: always;'></div>")
+			out.Printf("\n\n---\n")
 
-		// generate procedure
-		{
+			// set procedure list.
+			out.Println("## Procedures\n")
+			out.Println("name | comments")
+			out.Println(":--- | :---")
+
 			for _, p := range srcProcedureNames {
-				out.Printf("## %s\n", p)
-				out.Printf("> Comment : %s  \n\n\n", srcDB.GetObjectComments(PROCEDURE, p))
-				out.Println("Create Script")
-				out.Println("```sql")
-				script, err := srcDB.GetScript(PROCEDURE, p)
-				if err != nil {
-					log.Fatal(err)
+				out.Printf("[%s](#%s) | %s\n", p, MDReplace(p), srcDB.GetObjectComments(PROCEDURE, p))
+			}
+			out.Println("<div style='page-break-after: always;'></div>")
+			out.Printf("\n\n---\n")
+
+			// generate table.
+			{
+				// detail table ..
+				for _, srcTable := range srcTables {
+					out.Printf("## %s\n", srcTable.Name)
+					out.Printf("> Comment : %s  \n", srcTable.Comment)
+					out.Printf("> Engine : %s  \n", srcTable.Engine)
+					out.Printf("> Collation : %s  \n\n", srcTable.Collation)
+
+					// print column..
+					out.Println("\nColumns\n")
+					out.Println("name | type | null | default | extra | comment")
+					out.Println(":--- | :--- | :--- | :--- | :--- | :---")
+					for i := 0; i < len(srcTable.Cols); i++ {
+						col := srcTable.GetColumn(i)
+						out.Printf("%s | %s | %s | %s | %s | %s\n", col.Name, col.Type, col.Null, col.Default, col.Extra, col.Comment)
+					}
+					// print index.
+					out.Println("\nIndexs\n")
+					out.Println("name | columns | isnull")
+					out.Println(":--- | :--- | :---")
+					for _, idx := range srcTable.Indexs {
+						out.Printf("%s | %s | %t \n", idx.Name, strings.Join(idx.Cols, ","), idx.IsUnique)
+					}
+					out.Println("\nCreate Script\n")
+					out.Println("```sql")
+					script, err := srcDB.GetScript(TABLE, srcTable.Name)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script)
+					out.Printf("```\n")
+					out.Println("[goto table list...](#tables)")
+					out.Println("<div style='page-break-after: always;'></div>")
+					out.Printf("\n\n")
 				}
-				out.Println(script)
-				out.Printf("```\n")
-				out.Println("[goto procedure list...](#procedures)")
-				out.Println("<div style='page-break-after: always;'></div>")
-				out.Printf("\n\n")
+			}
+
+			// generate view
+			{
+				for _, v := range srcViewNames {
+					out.Printf("## %s\n\n\n", v)
+					out.Println("\nCreate Script\n")
+					out.Println("```sql")
+					script, err := srcDB.GetScript(VIEW, v)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script)
+					out.Printf("```\n")
+					out.Println("[goto view list...](#views)")
+					out.Println("<div style='page-break-after: always;'></div>")
+					out.Printf("\n\n")
+				}
+			}
+
+			// generate function
+			{
+				for _, f := range srcFunctionNames {
+					out.Printf("## %s\n", f)
+					out.Printf("> Comment : %s  \n\n\n", srcDB.GetObjectComments(FUNCTION, f))
+					out.Println("\nCreate Script\n")
+					out.Println("```sql")
+					script, err := srcDB.GetScript(FUNCTION, f)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script)
+					out.Printf("```\n")
+					out.Println("[goto function list...](#functions)")
+					out.Println("<div style='page-break-after: always;'></div>")
+					out.Printf("\n\n")
+				}
+			}
+
+			// generate procedure
+			{
+				for _, p := range srcProcedureNames {
+					out.Printf("## %s\n", p)
+					out.Printf("> Comment : %s  \n\n\n", srcDB.GetObjectComments(PROCEDURE, p))
+					out.Println("\nCreate Script\n")
+					out.Println("```sql")
+					script, err := srcDB.GetScript(PROCEDURE, p)
+					if err != nil {
+						log.Fatal(err)
+					}
+					out.Println(script)
+					out.Printf("```\n")
+					out.Println("[goto procedure list...](#procedures)")
+					out.Println("<div style='page-break-after: always;'></div>")
+					out.Printf("\n\n")
+				}
 			}
 		}
-
 	}
 }

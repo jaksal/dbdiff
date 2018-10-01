@@ -49,6 +49,14 @@ dbdiff -diff_type=doc
 -- 샘플파일은 sample 폴더에 있습니다. 
 -- output md file convert to pdf ==> ( https://github.com/jaksal/md2pdf )
 
+* create sql scrpit
+
+```
+dbdiff -diff_type=sql
+  -source="uid:pwd@tcp(server_ip:port)/dbname"
+  -output=output.sql
+```
+
 * extra option
 
 ```

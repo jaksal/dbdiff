@@ -35,7 +35,7 @@ type Config struct {
 func (c *Config) IsValid() bool {
 	if c.DiffType == "schema" || c.DiffType == "data" {
 		return c.Source != "" && c.Target != ""
-	} else if c.DiffType == "doc" {
+	} else if c.DiffType == "doc" || c.DiffType == "sql" {
 		return c.Source != ""
 	}
 	return false
