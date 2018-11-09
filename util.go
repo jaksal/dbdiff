@@ -109,6 +109,12 @@ func MDReplace(src string) string {
 	return strings.Replace(src, "_", "", -1)
 }
 
+// WikiReplace replace wiki special char
+func WikiReplace(src string) string {
+	//return r.Replace(src)
+	return strings.Replace(src, " ", "", -1)
+}
+
 // CommentReplace mysql comment replace
 func CommentReplace(src string) string {
 	return strings.Replace(src, "'", "\\'", -1)

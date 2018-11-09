@@ -6,8 +6,8 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
-
-	"github.com/kardianos/osext"
+	"os"
+	"path/filepath"
 )
 
 // Debug debug mode.
@@ -35,7 +35,7 @@ type Config struct {
 func (c *Config) IsValid() bool {
 	if c.DiffType == "schema" || c.DiffType == "data" {
 		return c.Source != "" && c.Target != ""
-	} else if c.DiffType == "doc" || c.DiffType == "sql" {
+	} else if c.DiffType == "md" || c.DiffType == "wiki" || c.DiffType == "sql" {
 		return c.Source != ""
 	}
 	return false
@@ -44,7 +44,8 @@ func (c *Config) IsValid() bool {
 // LoadConfig load config from file.
 func LoadConfig(path string) (*Config, error) {
 	if path == "" {
-		exePath, _ := osext.ExecutableFolder()
+		ex, _ := os.Executable()
+		exePath := filepath.Dir(ex)
 		path = exePath + "/conf.json"
 	}
 

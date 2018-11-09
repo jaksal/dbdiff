@@ -42,7 +42,7 @@ dbdiff -diff_type=data
 * create markdown document 
 
 ```
-dbdiff -diff_type=doc
+dbdiff -diff_type=md
   -source="uid:pwd@tcp(server_ip:port)/dbname"
   -output=output.md
 ```

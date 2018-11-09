@@ -59,7 +59,7 @@ func (c *Column) GetSQL() string {
 	return result
 }
 
-// Index indesc desc.
+// Index db index desc.
 type Index struct {
 	Name     string
 	Cols     []string

@@ -1,0 +1,903 @@
+-- Create Date : 2018-11-09T14:36:01 --
+h1. Schema :  oz_dev_game
+h3. Tables
+
+||name||comments||
+|[db_error|#dberror]|errors which are raised by procedures. |
+|[oz_bt_char|#ozbtchar]| |
+|[oz_bt_motion|#ozbtmotion]| |
+|[oz_bt_skin_char|#ozbtskinchar]| |
+|[oz_bt_skin_weapon|#ozbtskinweapon]| |
+|[oz_gt_char|#ozgtchar]|char  |
+|[oz_gt_motion|#ozgtmotion]| |
+|[oz_gt_skin|#ozgtskin]| |
+|[oz_gt_user|#ozgtuser]| |
+|[oz_gt_weapon_skin|#ozgtweaponskin]| |
+
+
+----
+h3. Views
+
+||name||
+|[oz_vt_inven|#ozvtinven]|
+
+
+----
+h3. Functions
+
+||name||comments||
+|[fn_check_base_data|#fncheckbasedata]|checks if base tables are valid; it returns any error messages if exist. |
+|[fn_check_resource|#fncheckresource]| |
+|[fn_rand|#fnrand]|generates a random number. |
+|[fn_split_string|#fnsplitstring]|returns substrings splited from the source string. |
+
+
+----
+h3 Procedures
+
+||name||comments||
+|[fn_db_error|#fndberror]|inserts procedure error logs into db_error.. |
+|[sp_char_motion_update|#spcharmotionupdate]|character motion update |
+|[sp_char_skin_insert|#spcharskininsert]|character skin insert proc |
+|[sp_char_skin_update|#spcharskinupdate]|character skin update proc |
+|[sp_insert_player|#spinsertplayer]| |
+|[sp_motion_insert|#spmotioninsert]|motion insert proc |
+|[sp_user_create|#spusercreate]|character motion update |
+
+
+----
+
+
+----
+h3. db_error
+bq. Comment : errors which are raised by procedures.\\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|sn|bigint(20)|NO | |auto_increment |log sn |
+|log_date|datetime|NO |CURRENT_TIMESTAMP | |log date |
+|usn|bigint(20) unsigned|YES | | |USN |
+|sp_name|varchar(50)|YES | | |name of the procedure |
+|params|varchar(1024)|YES | | |parameter list (separated by '|') |
+|sql_state|varchar(50)|YES | | |mysql sql state |
+|err_no|int(11)|YES | | |mysql error number |
+|err_msg|varchar(512)|YES | | |mysql error text |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|sn |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `db_error` (
+  `sn` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'log sn',
+  `log_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'log date',
+  `usn` bigint(20) unsigned DEFAULT NULL COMMENT 'USN',
+  `sp_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'name of the procedure',
+  `params` varchar(1024) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'parameter list (separated by ''|'')',
+  `sql_state` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'mysql sql state',
+  `err_no` int(11) DEFAULT NULL COMMENT 'mysql error number',
+  `err_msg` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'mysql error text',
+  PRIMARY KEY (`sn`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci COMMENT='errors which are raised by procedures.'
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_bt_char
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|id|int(11)|NO | | |char id |
+|name|varchar(50)|YES | | |char name |
+|update_date|datetime|NO |CURRENT_TIMESTAMP |on update CURRENT_TIMESTAMP |update date |
+|is_default|tinyint(4)|NO |0 | |default char |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_bt_char` (
+  `id` int(11) NOT NULL COMMENT 'char id',
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'char name',
+  `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  `is_default` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'default char',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_bt_motion
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|id|int(11)|NO | | |motion id |
+|char_id|int(11)|YES | | |related character id |
+|update_date|datetime|NO |CURRENT_TIMESTAMP |on update CURRENT_TIMESTAMP |update date |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_bt_motion` (
+  `id` int(11) NOT NULL COMMENT 'motion id',
+  `char_id` int(11) DEFAULT NULL COMMENT 'related character id',
+  `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_bt_skin_char
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|id|int(11)|NO | | |skin id |
+|char_id|int(11)|YES | | |related character id |
+|update_date|datetime|NO |CURRENT_TIMESTAMP |on update CURRENT_TIMESTAMP |update date |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_bt_skin_char` (
+  `id` int(11) NOT NULL COMMENT 'skin id',
+  `char_id` int(11) DEFAULT NULL COMMENT 'related character id',
+  `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_bt_skin_weapon
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|id|int(11)|NO | | |skin id |
+|char_id|int(11)|YES | | |related character id |
+|update_date|datetime|NO |CURRENT_TIMESTAMP |on update CURRENT_TIMESTAMP |update date |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_bt_skin_weapon` (
+  `id` int(11) NOT NULL COMMENT 'skin id',
+  `char_id` int(11) DEFAULT NULL COMMENT 'related character id',
+  `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_gt_char
+bq. Comment : char \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|row_id|bigint(20)|NO | |auto_increment |row id |
+|usn|bigint(20)|NO | | |usn |
+|char_id|int(11)|NO | | |character id |
+|skin|int(11)|NO |0 | |equip skin id (fk:oz_bt_skin_char.id) |
+|wskin|int(11)|NO |0 | |equip weapon skin id (fk:oz_bt_skin_weapon.id) |
+|motion_0|int(11)|NO |0 | |equip motion id in slot 0 |
+|motion_1|int(11)|NO |0 | |equip motion id in slot 1 |
+|motion_2|int(11)|NO |0 | |equip motion id in slot 2 |
+|motion_3|int(11)|NO |0 | |equip motion id in slot 3 |
+|update_date|datetime|NO |CURRENT_TIMESTAMP |on update CURRENT_TIMESTAMP |update date |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|row_id |true |
+|usn_char_id|usn,char_id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_gt_char` (
+  `row_id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'row id',
+  `usn` bigint(20) NOT NULL COMMENT 'usn',
+  `char_id` int(11) NOT NULL COMMENT 'character id',
+  `skin` int(11) NOT NULL DEFAULT '0' COMMENT 'equip skin id (fk:oz_bt_skin_char.id)',
+  `wskin` int(11) NOT NULL DEFAULT '0' COMMENT 'equip weapon skin id (fk:oz_bt_skin_weapon.id)',
+  `motion_0` int(11) NOT NULL DEFAULT '0' COMMENT 'equip motion id in slot 0',
+  `motion_1` int(11) NOT NULL DEFAULT '0' COMMENT 'equip motion id in slot 1',
+  `motion_2` int(11) NOT NULL DEFAULT '0' COMMENT 'equip motion id in slot 2',
+  `motion_3` int(11) NOT NULL DEFAULT '0' COMMENT 'equip motion id in slot 3',
+  `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  PRIMARY KEY (`row_id`),
+  UNIQUE KEY `usn_char_id` (`usn`,`char_id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci COMMENT='char '
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_gt_motion
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|usn|bigint(20)|NO | | | |
+|motion_id|int(11)|NO | | | |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|usn,motion_id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_gt_motion` (
+  `usn` bigint(20) NOT NULL,
+  `motion_id` int(11) NOT NULL,
+  PRIMARY KEY (`usn`,`motion_id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_gt_skin
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|usn|bigint(20)|NO | | | |
+|skin_id|int(11)|NO | | | |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|usn,skin_id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_gt_skin` (
+  `usn` bigint(20) NOT NULL,
+  `skin_id` int(11) NOT NULL,
+  PRIMARY KEY (`usn`,`skin_id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_gt_user
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|usn|int(11)|NO | | |usn |
+|nick|varchar(32)|YES | | |nickname |
+|dp|int(11)|NO |0 | |dot point |
+|reg_date|datetime|NO |CURRENT_TIMESTAMP | |regist date |
+|update_date|datetime|NO |CURRENT_TIMESTAMP |on update CURRENT_TIMESTAMP |update date |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|usn |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_gt_user` (
+  `usn` int(11) NOT NULL COMMENT 'usn',
+  `nick` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'nickname',
+  `dp` int(11) NOT NULL DEFAULT '0' COMMENT 'dot point',
+  `reg_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'regist date',
+  `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'update date',
+  PRIMARY KEY (`usn`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+h3. oz_gt_weapon_skin
+bq. Comment : \\Engine : InnoDB\\Collation : utf8mb4_unicode_ci\\
+h5. Columns
+
+||name||type||null||default||extra||comment||
+|usn|bigint(20)|NO | | | |
+|wskin_id|int(11)|NO | | | |
+|update_date|datetime|YES |CURRENT_TIMESTAMP | | |
+
+h5. Indexs
+
+||name||columns||isnull||
+|PRIMARY|usn,wskin_id |true |
+
+h5. Create Script
+
+{code}
+CREATE TABLE `oz_gt_weapon_skin` (
+  `usn` bigint(20) NOT NULL,
+  `wskin_id` int(11) NOT NULL,
+  `update_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`usn`,`wskin_id`)
+) ENGINE=InnoDB COLLATE=utf8mb4_unicode_ci
+{code}
+[goto table list...|#tables]
+
+
+##h3. oz_vt_inven
+
+
+
+h5. Create Script
+
+{code}
+CREATE VIEW `oz_vt_inven` AS select `oz_gt_skin`.`usn` AS `usn`,`oz_gt_skin`.`skin_id` AS `id`,0 AS `inven_type` from `oz_gt_skin` union all select `oz_gt_weapon_skin`.`usn` AS `usn`,`oz_gt_weapon_skin`.`wskin_id` AS `id`,1 AS `inven_type` from `oz_gt_weapon_skin` union all select `oz_gt_motion`.`usn` AS `usn`,`oz_gt_motion`.`motion_id` AS `id`,2 AS `inven_type` from `oz_gt_motion`
+{code}
+[goto view list...|#views]
+
+
+h3. fn_check_base_data
+bq. Comment : checks if base tables are valid; it returns any error messages if exist.  
+
+
+
+h5. Create Script
+
+{code}
+CREATE FUNCTION `fn_check_base_data`() RETURNS varchar(10000) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
+    COMMENT 'checks if base tables are valid; it returns any error messages if exist.'
+BEGIN
+	DECLARE v_output	VARCHAR(10000) DEFAULT '';
+	
+	-- check oz_bt_motion table
+	SELECT GROUP_CONCAT(CONCAT(tt.id,':',tt.check_resource) SEPARATOR '|')
+	INTO v_output
+	FROM (
+		SELECT * FROM
+		(
+			SELECT 
+				id,
+				fn_check_resource(char_id,1) AS check_resource
+			FROM oz_bt_motion
+		) AS tt
+		WHERE tt.check_resource IS NOT NULL
+		LIMIT 10
+	) AS tt;
+
+	IF NULLIF(v_output,'') IS NOT NULL THEN
+		RETURN CONCAT('oz_bt_motion => ',v_output);
+	END IF;
+	
+	-- check oz_bt_skin_char table
+	SELECT GROUP_CONCAT(CONCAT(tt.id,':',tt.check_resource) SEPARATOR '|')
+	INTO v_output
+	FROM (
+		SELECT * FROM
+		(
+			SELECT 
+				id,
+				fn_check_resource(char_id,1) AS check_resource
+			FROM oz_bt_skin_char
+		) AS tt
+		WHERE tt.check_resource IS NOT NULL
+		LIMIT 10
+	) AS tt;
+
+	IF NULLIF(v_output,'') IS NOT NULL THEN
+		RETURN CONCAT('oz_bt_skin_char => ',v_output);
+	END IF;
+	
+	-- check oz_bt_skin_weapon table
+	SELECT GROUP_CONCAT(CONCAT(tt.id,':',tt.check_resource) SEPARATOR '|')
+	INTO v_output
+	FROM (
+		SELECT * FROM
+		(
+			SELECT 
+				id,
+				fn_check_resource(char_id,1) AS check_resource
+			FROM oz_bt_skin_weapon
+		) AS tt
+		WHERE tt.check_resource IS NOT NULL
+		LIMIT 10
+	) AS tt;
+
+	IF NULLIF(v_output,'') IS NOT NULL THEN
+		RETURN CONCAT('oz_bt_skin_weapon => ',v_output);
+	END IF;
+	
+	RETURN '';
+END
+{code}
+[goto function list...|#functions]
+
+
+h3. fn_check_resource
+bq. Comment :   
+
+
+
+h5. Create Script
+
+{code}
+CREATE FUNCTION `fn_check_resource`(
+	`pi_resource_id` INT,
+	`pi_type` TINYINT
+
+) RETURNS varchar(100) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci
+BEGIN
+	DECLARE v_exist INT DEFAULT 0;
+	
+	CASE
+		WHEN pi_type = 1 THEN
+			SELECT IFNULL(MIN(id),0) INTO v_exist
+			FROM oz_bt_char
+			WHERE id = pi_resource_id;
+			
+			IF v_exist = 0 THEN
+				RETURN CONCAT('not found char : ', pi_resource_id);
+			END IF; 
+	END CASE;
+	
+	RETURN NULL;
+END
+{code}
+[goto function list...|#functions]
+
+
+h3. fn_rand
+bq. Comment : generates a random number.  
+
+
+
+h5. Create Script
+
+{code}
+CREATE FUNCTION `fn_rand`(
+	`pi_max` INT
+) RETURNS int(11)
+    COMMENT 'generates a random number.'
+BEGIN
+	RETURN FLOOR(RAND() * pi_max);
+END
+{code}
+[goto function list...|#functions]
+
+
+h3. fn_split_string
+bq. Comment : returns substrings splited from the source string.  
+
+
+
+h5. Create Script
+
+{code}
+CREATE FUNCTION `fn_split_string`(
+	`pi_src` VARCHAR(10000),
+	`pi_delimiter` VARCHAR(2),
+	`pi_pos` INT
+) RETURNS varchar(100) CHARSET utf8
+    COMMENT 'returns substrings splited from the source string.'
+BEGIN
+	IF pi_src IS NULL OR LENGTH(TRIM(pi_src)) = 0 THEN
+		RETURN '';
+	END IF;	
+
+	IF LOCATE(pi_delimiter, pi_src) = 0 THEN
+		IF pi_pos = 1 THEN
+			RETURN pi_src;
+		ELSE
+			RETURN '';
+		END IF;
+	END IF;	
+
+	RETURN
+		IFNULL(
+			REPLACE(
+				SUBSTRING(
+					SUBSTRING_INDEX(pi_src, pi_delimiter, pi_pos),
+					CHAR_LENGTH(
+						SUBSTRING_INDEX(pi_src, pi_delimiter, pi_pos - 1)
+					) + 1),
+					pi_delimiter,
+					''),
+				'');
+END
+{code}
+[goto function list...|#functions]
+
+
+h3. fn_db_error
+bq. Comment : inserts procedure error logs into db_error..  
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `fn_db_error`(
+	IN `pi_usn` BIGINT,
+	IN `pi_sp_name` VARCHAR(50),
+	IN `pi_params` VARCHAR(1024),
+	IN `pi_sqlstate` VARCHAR(50),
+	IN `pi_err_no` INT,
+	IN `pi_err_msg` VARCHAR(512)
+
+)
+    COMMENT 'inserts procedure error logs into db_error..'
+BEGIN
+	INSERT INTO db_error (usn,sp_name,params,sql_state,err_no,err_msg)
+	VALUES (pi_usn,pi_sp_name,pi_params,pi_sqlstate,pi_err_no,pi_err_msg);
+END
+{code}
+[goto procedure list...|#procedures]
+
+
+h3. sp_char_motion_update
+bq. Comment : character motion update  
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `sp_char_motion_update`(
+	IN `pi_usn` BIGINT,
+	IN `pi_char_id` INT,
+	IN `pi_motion_id` INT,
+	IN `pi_slot` TINYINT
+
+
+
+
+)
+    COMMENT 'character motion update'
+THIS_SP:
+BEGIN
+	DECLARE v_return INT DEFAULT 0;
+	
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING
+	BEGIN
+		GET DIAGNOSTICS CONDITION 1
+			@v_sqlstate = RETURNED_SQLSTATE,
+			@v_err_no = MYSQL_ERRNO,
+			@v_err_msg = MESSAGE_TEXT;
+		ROLLBACK;
+
+		SET v_return = -999;
+
+		SET @v_sp_name := 'sp_char_motion_update';
+		SET @v_params := CONCAT(pi_usn, '|', pi_char_id, '|', pi_motion_id,'|',pi_slot);
+		CALL fn_db_error(pi_usn, @v_sp_name, @v_params, @v_sqlstate, @v_err_no, @v_err_msg);
+		SELECT v_return;
+	END;
+
+	START TRANSACTION;
+	
+	-- update char motion update
+	CASE 
+		WHEN pi_slot = 0 THEN
+			UPDATE oz_gt_char SET
+				motion_0 = pi_motion_id
+			WHERE usn = pi_usn AND char_id = pi_char_id;
+		WHEN pi_slot = 1 THEN
+			UPDATE oz_gt_char SET
+				motion_1 = pi_motion_id
+			WHERE usn = pi_usn AND char_id = pi_char_id;
+		WHEN pi_slot = 2 THEN
+			UPDATE oz_gt_char SET
+				motion_2 = pi_motion_id
+			WHERE usn = pi_usn AND char_id = pi_char_id;
+		WHEN pi_slot = 3 THEN
+			UPDATE oz_gt_char SET
+				motion_3 = pi_motion_id
+			WHERE usn = pi_usn AND char_id = pi_char_id;
+	END CASE;
+	
+	IF ROW_COUNT() = 0 THEN
+		ROLLBACK;
+		SET v_return = -999;
+		SELECT v_return;
+		LEAVE THIS_SP;
+	END IF;	
+	
+	COMMIT;    
+	SELECT v_return;	
+END
+{code}
+[goto procedure list...|#procedures]
+
+
+h3. sp_char_skin_insert
+bq. Comment : character skin insert proc  
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `sp_char_skin_insert`(IN pi_usn BIGINT, IN pi_skin_id INT, IN pi_slot TINYINT)
+    COMMENT 'character skin insert proc'
+THIS_SP:
+BEGIN
+	DECLARE v_return INT DEFAULT 0;
+	
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING
+	BEGIN
+		GET DIAGNOSTICS CONDITION 1
+			@v_sqlstate = RETURNED_SQLSTATE,
+			@v_err_no = MYSQL_ERRNO,
+			@v_err_msg = MESSAGE_TEXT;
+		ROLLBACK;
+
+		SET v_return = -999;
+
+		SET @v_sp_name := 'sp_char_skin_insert';
+		SET @v_params := CONCAT(pi_usn, '|', pi_skin_id , '|', `pi_slot`);
+		CALL fn_db_error(pi_usn, @v_sp_name, @v_params, @v_sqlstate, @v_err_no, @v_err_msg);
+		SELECT v_return;
+	END;
+
+	START TRANSACTION;
+
+	CASE 
+		WHEN pi_slot = 0 THEN			
+			-- insert char skin 
+			INSERT INTO oz_gt_skin (usn, skin_id)
+      VALUES (pi_usn, pi_skin_id);
+			
+		WHEN pi_slot = 1 THEN
+		
+		  INSERT INTO oz_gt_weapon_skin (usn, wskin_id)
+      VALUES (pi_usn, pi_skin_id);
+	END CASE;
+  
+	
+	IF ROW_COUNT() = 0 THEN
+		ROLLBACK;
+		SET v_return = -999;
+		SELECT v_return;
+		LEAVE THIS_SP;
+	END IF;	
+	
+	COMMIT;    
+	SELECT v_return;	
+END
+{code}
+[goto procedure list...|#procedures]
+
+
+h3. sp_char_skin_update
+bq. Comment : character skin update proc  
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `sp_char_skin_update`(
+	IN `pi_usn` BIGINT,
+	IN `pi_char_id` INT,
+	IN `pi_skin_id` INT
+,
+	IN `pi_slot` TINYINT
+
+
+
+
+)
+    COMMENT 'character skin update proc'
+THIS_SP:
+BEGIN
+	DECLARE v_return INT DEFAULT 0;
+	
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING
+	BEGIN
+		GET DIAGNOSTICS CONDITION 1
+			@v_sqlstate = RETURNED_SQLSTATE,
+			@v_err_no = MYSQL_ERRNO,
+			@v_err_msg = MESSAGE_TEXT;
+		ROLLBACK;
+
+		SET v_return = -999;
+
+		SET @v_sp_name := 'sp_char_skin_update';
+		SET @v_params := CONCAT(pi_usn, '|', pi_char_id, '|', pi_skin_id,'|',pi_slot);
+		CALL fn_db_error(pi_usn, @v_sp_name, @v_params, @v_sqlstate, @v_err_no, @v_err_msg);
+		SELECT v_return;
+	END;
+
+	START TRANSACTION;
+	
+	CASE 
+		WHEN pi_slot = 0 THEN
+			
+			-- update char skin 
+			INSERT INTO oz_gt_char (usn,char_id,skin ) 
+			VALUES (pi_usn,pi_char_id,pi_skin_id)
+			ON DUPLICATE KEY UPDATE
+				skin = pi_skin_id;
+			
+		WHEN pi_slot = 1 THEN
+		
+		-- update weapon skin
+			INSERT INTO oz_gt_char (usn,char_id,wskin ) 
+			VALUES (pi_usn,pi_char_id,pi_skin_id)
+			ON DUPLICATE KEY UPDATE
+				wskin = pi_skin_id;
+	END CASE;
+	
+	IF ROW_COUNT() = 0 THEN
+		ROLLBACK;
+		SET v_return = -999;
+		SELECT v_return;
+		LEAVE THIS_SP;
+	END IF;	
+	
+	COMMIT;    
+	SELECT v_return;	
+END
+{code}
+[goto procedure list...|#procedures]
+
+
+h3. sp_insert_player
+bq. Comment :   
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `sp_insert_player`(
+	IN `pi_usn` BIGINT,
+	IN `pi_game_id` VARCHAR(255),
+	IN `pi_nick` VARCHAR(255)
+
+)
+BEGIN
+
+
+  INSERT INTO oz_gt_user(usn, nick,  dp )
+  VALUES(pi_usn, pi_nick, 100 );
+  SELECT ROW_COUNT();
+  
+  -- insert default char 
+  -- INSERT INTO oz_gt_char (usn, char_id)
+  -- SELECT pi_usn,id FROM oz_bt_char WHERE is_default=1; 
+  
+  
+
+END
+{code}
+[goto procedure list...|#procedures]
+
+
+h3. sp_motion_insert
+bq. Comment : motion insert proc  
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `sp_motion_insert`(
+	IN `pi_usn` BIGINT,
+	IN `pi_motion_id` int
+)
+    COMMENT 'motion insert proc'
+THIS_SP:
+BEGIN
+	DECLARE v_return INT DEFAULT 0;
+	
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING
+	BEGIN
+		GET DIAGNOSTICS CONDITION 1
+			@v_sqlstate = RETURNED_SQLSTATE,
+			@v_err_no = MYSQL_ERRNO,
+			@v_err_msg = MESSAGE_TEXT;
+		ROLLBACK;
+
+		SET v_return = -999;
+
+		SET @v_sp_name := 'sp_char_skin_insert';
+		SET @v_params := CONCAT(pi_usn, '|', `pi_motion_id`);
+		CALL fn_db_error(pi_usn, @v_sp_name, @v_params, @v_sqlstate, @v_err_no, @v_err_msg);
+		SELECT v_return;
+	END;
+
+	START TRANSACTION;
+
+	INSERT INTO oz_gt_motion (usn, motion_id)
+  VALUES (pi_usn, pi_motion_id);  
+	
+	IF ROW_COUNT() = 0 THEN
+		ROLLBACK;
+		SET v_return = -999;
+		SELECT v_return;
+		LEAVE THIS_SP;
+	END IF;	
+	
+	COMMIT;    
+	SELECT v_return;	
+END
+{code}
+[goto procedure list...|#procedures]
+
+
+h3. sp_user_create
+bq. Comment : character motion update  
+
+
+
+h5. Create Script
+
+{code}
+CREATE PROCEDURE `sp_user_create`(
+	IN `pi_usn` BIGINT,
+	IN `pi_nick` VARCHAR(32)
+)
+    COMMENT 'character motion update'
+THIS_SP:
+BEGIN
+	DECLARE v_return INT DEFAULT 0;
+  DECLARE v_dp INT DEFAULT 100;
+	
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION, SQLWARNING
+	BEGIN
+		GET DIAGNOSTICS CONDITION 1
+			@v_sqlstate = RETURNED_SQLSTATE,
+			@v_err_no = MYSQL_ERRNO,
+			@v_err_msg = MESSAGE_TEXT;
+		ROLLBACK;
+
+		SET v_return = -999;
+
+		SET @v_sp_name := 'sp_user_create';
+		SET @v_params := CONCAT(pi_usn, '|', pi_nick);
+		CALL fn_db_error(pi_usn, @v_sp_name, @v_params, @v_sqlstate, @v_err_no, @v_err_msg);
+		SELECT v_return;
+	END;
+
+	START TRANSACTION;
+	
+  -- create user if not exist
+  INSERT INTO oz_gt_user ( usn,  nick , dp ) VALUES ( pi_usn, pi_nick, v_dp ) ON DUPLICATE KEY UPDATE nick = pi_nick;
+	
+	IF ROW_COUNT() = 0 THEN
+		ROLLBACK;
+		SET v_return = -999;
+		SELECT v_return;
+		LEAVE THIS_SP;
+	END IF;	
+	
+	COMMIT;    
+	SELECT v_return , pi_nick , v_dp;	
+END
+{code}
+[goto procedure list...|#procedures]
+
+
