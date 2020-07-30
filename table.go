@@ -41,7 +41,7 @@ func (c *Column) compare(dst *Column) bool {
 func (c *Column) GetSQL() string {
 	var result string
 
-	result = c.Name + " " + c.Type
+	result =  "`" + c.Name + "`" + " " + c.Type
 	if c.Null == "YES" {
 		result += " NULL"
 	} else {
@@ -253,7 +253,7 @@ func (d *DB) GetTableInfo(name string) *Table {
 
 func (t *Table) getBeforeColumn(idx int) string {
 	if idx == 0 {
-		return "FRIST"
+		return " FIRST"
 	}
 	return " AFTER " + t.GetColumn(idx-1).Name
 }
