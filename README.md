@@ -16,7 +16,7 @@ install :
 * install golang latest. (https://golang.org/dl/)
 * download src (git clone https://github.com/jaksal/dbdiff.git)
 * goto src folder 
-* go get && go build
+* go build
 
 usage :
 -------------
