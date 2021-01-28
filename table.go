@@ -211,6 +211,21 @@ func (d *DB) GetTableInfo(name string) *Table {
 				Extra:   c.Get("Extra").(string),
 				Comment: c.Get("Comment").(string),
 			}
+			
+			// 컬럼 타입이 숫자일 경우 int(10) -> int 로 변경.
+			// DB 버전에 따라 다르게 보이는 이슈.
+			// zerofill 옵션이 아닐경우에는 int 로 통일.
+			if strings.HasPrefix(col.Type, "tinyint") ||
+				strings.HasPrefix(col.Type, "smallint") ||
+				strings.HasPrefix(col.Type, "mediumint") ||
+				strings.HasPrefix(col.Type, "int") ||
+				strings.HasPrefix(col.Type, "bigint") ||
+				strings.HasPrefix(col.Type, "float") ||
+				strings.HasPrefix(col.Type, "double") ||
+				strings.HasPrefix(col.Type, "decimal") {
+				col.Type = strings.Split(col.Type, "(")[0]
+			}
+			
 			result.Cols[col.Name] = col
 			idx++
 		}
