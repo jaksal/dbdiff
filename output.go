@@ -31,7 +31,7 @@ func (o *Output) Close(isUpdate bool) {
 	if o.f != nil {
 		o.f.Close()
 
-		if isUpdate == false {
+		if !isUpdate {
 			os.Remove(o.f.Name())
 		}
 	}

@@ -26,22 +26,16 @@ func mysqlEscape(source []byte) string {
 		switch c {
 		case 0: /* Must be escaped for 'mysql' */
 			escape = '0'
-			break
 		case '\n': /* Must be escaped for logs */
 			escape = 'n'
-			break
 		case '\r':
 			escape = 'r'
-			break
 		case '\\':
 			escape = '\\'
-			break
 		case '\'':
 			escape = '\''
-			break
 		case '"': /* Better safe than sorry */
 			escape = '"'
-			break
 		case '\032': /* This gives problems on Win32 */
 			escape = 'Z'
 		}
@@ -105,8 +99,10 @@ var r = strings.NewReplacer(
 
 // MDReplace replace md special char
 func MDReplace(src string) string {
-	//return r.Replace(src)
-	return strings.Replace(src, "_", "", -1)
+	ret := strings.ToLower(src)
+	ret = strings.Replace(ret, " ", "", -1)
+	ret = strings.Replace(ret, "_", "", -1)
+	return ret
 }
 
 // WikiReplace replace wiki special char

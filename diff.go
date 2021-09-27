@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"reflect"
 	"strconv"
 )
 
@@ -52,7 +51,7 @@ func (d *DiffRow) GetKey() string {
 }
 
 func getDataStr(v interface{}) string {
-	switch v.(type) {
+	switch t := v.(type) {
 	case string:
 		return fmt.Sprintf("'%s'", v.(string))
 	case int:
@@ -61,8 +60,9 @@ func getDataStr(v interface{}) string {
 		return strconv.FormatFloat(v.(float64), 'f', -1, 64)
 	case nil:
 		return "NULL"
+	default:
+		log.Fatalln("check type..", t)
 	}
-	log.Fatalln("check type..", reflect.ValueOf(v))
 	return ""
 }
 

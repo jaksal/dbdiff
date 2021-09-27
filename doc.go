@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//MakeDoc make doc file
 func MakeDoc(srcDB *DB, conf *Config) {
 	// make md file.
 	out := &Output{}
@@ -13,8 +14,6 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		log.Fatal(err, conf.Output)
 	}
 	defer out.Close(true)
-
-	out.Printf("-- Create Date : %s --\n", time.Now().Format("2006-01-02T15:04:05"))
 
 	// get table list.
 	srcTableNames, err := srcDB.GetObjectList(TABLE, conf.Include, conf.Exclude)
@@ -36,6 +35,7 @@ func MakeDoc(srcDB *DB, conf *Config) {
 	}
 
 	if conf.DiffType == "sql" {
+		out.Printf("-- Create Date : %s --\n", time.Now().Format("2006-01-02T15:04:05"))
 		// output sql file
 		out.Printf("-- DB : %s\n\n", srcDB.DBName)
 
@@ -97,13 +97,14 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		}
 
 	} else if conf.DiffType == "md" {
+		out.Printf("-- Create Date : %s --\n", time.Now().Format("2006-01-02T15:04:05"))
 		// output md file.
 		out.Println("# Schema : ", srcDB.DBName)
 
 		// set table list table.
-		out.Println("## Tables\n")
-		out.Println("name | comments")
-		out.Println(":--- | :---")
+		out.Printf("## Tables\n")
+		out.Println("| name | comments |")
+		out.Println("| :--- | :--- |")
 
 		var srcTables []*Table
 		for _, t := range srcTableNames {
@@ -111,7 +112,7 @@ func MakeDoc(srcDB *DB, conf *Config) {
 			if srcTable == nil {
 				log.Fatal("load table info error", err)
 			}
-			out.Printf("[%s](#%s) | %s\n", srcTable.Name, MDReplace(srcTable.Name), srcTable.Comment)
+			out.Printf("| [%s](#%s) | %s |\n", srcTable.Name, MDReplace(srcTable.Name), srcTable.Comment)
 
 			srcTables = append(srcTables, srcTable)
 		}
@@ -119,35 +120,35 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		out.Printf("\n\n---\n")
 
 		// set view list table.
-		out.Println("## Views\n")
-		out.Println("name |")
-		out.Println(":--- |")
+		out.Printf("## Views\n")
+		out.Println("| name |")
+		out.Println("| :--- |")
 
 		for _, v := range srcViewNames {
-			out.Printf("[%s](#%s) |\n", v, MDReplace(v))
+			out.Printf("| [%s](#%s) |\n", v, MDReplace(v))
 		}
 		out.Println("<div style='page-break-after: always;'></div>")
 		out.Printf("\n\n---\n")
 
 		// set function list.
 		// set table list table.
-		out.Println("## Functions\n")
-		out.Println("name | comments")
-		out.Println(":--- | :---")
+		out.Printf("## Functions\n")
+		out.Println("| name | comments |")
+		out.Println("| :--- | :--- |")
 
 		for _, f := range srcFunctionNames {
-			out.Printf("[%s](#%s) | %s\n", f, MDReplace(f), srcDB.GetObjectComments(FUNCTION, f))
+			out.Printf("| [%s](#%s) | %s |\n", f, MDReplace(f), srcDB.GetObjectComments(FUNCTION, f))
 		}
 		out.Println("<div style='page-break-after: always;'></div>")
 		out.Printf("\n\n---\n")
 
 		// set procedure list.
-		out.Println("## Procedures\n")
-		out.Println("name | comments")
-		out.Println(":--- | :---")
+		out.Printf("## Procedures\n")
+		out.Println("| name | comments |")
+		out.Println("| :--- | :--- |")
 
 		for _, p := range srcProcedureNames {
-			out.Printf("[%s](#%s) | %s\n", p, MDReplace(p), srcDB.GetObjectComments(PROCEDURE, p))
+			out.Printf("| [%s](#%s) | %s |\n", p, MDReplace(p), srcDB.GetObjectComments(PROCEDURE, p))
 		}
 		out.Println("<div style='page-break-after: always;'></div>")
 		out.Printf("\n\n---\n")
@@ -156,34 +157,35 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		{
 			// detail table ..
 			for _, srcTable := range srcTables {
+				out.Printf("<div id='%s'></div>\n\n", MDReplace(srcTable.Name))
 				out.Printf("## %s\n", srcTable.Name)
 				out.Printf("> Comment : %s  \n", srcTable.Comment)
 				out.Printf("> Engine : %s  \n", srcTable.Engine)
 				out.Printf("> Collation : %s  \n\n", srcTable.Collation)
 
 				// print column..
-				out.Println("\nColumns\n")
-				out.Println("name | type | null | default | extra | comment")
-				out.Println(":--- | :--- | :--- | :--- | :--- | :---")
+				out.Printf("### Columns\n")
+				out.Println("| name | type | null | default | extra | comment |")
+				out.Println("| :--- | :--- | :--- | :--- | :--- | :--- |")
 				for i := 0; i < len(srcTable.Cols); i++ {
 					col := srcTable.GetColumn(i)
-					out.Printf("%s | %s | %s | %s | %s | %s\n", col.Name, col.Type, col.Null, col.Default, col.Extra, col.Comment)
+					out.Printf("| %s | %s | %s | %s | %s | %s |\n", col.Name, col.Type, col.Null, col.Default, col.Extra, col.Comment)
 				}
 				// print index.
-				out.Println("\nIndexs\n")
-				out.Println("name | columns | isnull")
-				out.Println(":--- | :--- | :---")
+				out.Printf("\n### Indexs\n")
+				out.Println("| name | columns | isnull |")
+				out.Println("| :--- | :--- | :--- |")
 				for _, idx := range srcTable.Indexs {
 					out.Printf("%s | %s | %t \n", idx.Name, strings.Join(idx.Cols, ","), idx.IsUnique)
 				}
-				out.Println("\nCreate Script\n")
-				out.Println("{code}sql")
+				out.Printf("\n### Create Script\n")
+				out.Println("```sql")
 				script, err := srcDB.GetScript(TABLE, srcTable.Name)
 				if err != nil {
 					log.Fatal(err)
 				}
 				out.Println(script)
-				out.Printf("{code}\n")
+				out.Printf("```\n")
 				out.Println("[goto table list...](#tables)")
 				out.Println("<div style='page-break-after: always;'></div>")
 				out.Printf("\n\n")
@@ -193,15 +195,16 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		// generate view
 		{
 			for _, v := range srcViewNames {
+				out.Printf("<div id='%s'></div>\n\n", MDReplace(v))
 				out.Printf("## %s\n\n\n", v)
-				out.Println("\nCreate Script\n")
-				out.Println("{code}sql")
+				out.Printf("### Create Script\n")
+				out.Println("```sql")
 				script, err := srcDB.GetScript(VIEW, v)
 				if err != nil {
 					log.Fatal(err)
 				}
 				out.Println(script)
-				out.Printf("{code}\n")
+				out.Printf("```\n")
 				out.Println("[goto view list...](#views)")
 				out.Println("<div style='page-break-after: always;'></div>")
 				out.Printf("\n\n")
@@ -211,16 +214,17 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		// generate function
 		{
 			for _, f := range srcFunctionNames {
+				out.Printf("<div id='%s'></div>\n\n", MDReplace(f))
 				out.Printf("## %s\n", f)
 				out.Printf("> Comment : %s  \n\n\n", srcDB.GetObjectComments(FUNCTION, f))
-				out.Println("\nCreate Script\n")
-				out.Println("{code}sql")
+				out.Printf("### Create Script\n")
+				out.Println("```sql")
 				script, err := srcDB.GetScript(FUNCTION, f)
 				if err != nil {
 					log.Fatal(err)
 				}
 				out.Println(script)
-				out.Printf("{code}\n")
+				out.Printf("```\n")
 				out.Println("[goto function list...](#functions)")
 				out.Println("<div style='page-break-after: always;'></div>")
 				out.Printf("\n\n")
@@ -230,27 +234,29 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		// generate procedure
 		{
 			for _, p := range srcProcedureNames {
+				out.Printf("<div id='%s'></div>\n\n", MDReplace(p))
 				out.Printf("## %s\n", p)
 				out.Printf("> Comment : %s  \n\n\n", srcDB.GetObjectComments(PROCEDURE, p))
-				out.Println("\nCreate Script\n")
-				out.Println("{code}sql")
+				out.Printf("### Create Script\n")
+				out.Println("```sql")
 				script, err := srcDB.GetScript(PROCEDURE, p)
 				if err != nil {
 					log.Fatal(err)
 				}
 				out.Println(script)
-				out.Printf("{code}\n")
+				out.Printf("```\n")
 				out.Println("[goto procedure list...](#procedures)")
 				out.Println("<div style='page-break-after: always;'></div>")
 				out.Printf("\n\n")
 			}
 		}
 	} else if conf.DiffType == "wiki" {
+		out.Printf("-- Update Date : %s --\n", time.Now().Format("2006-01-02T15:04:05"))
 		// output confluence wiki file.
 		out.Println("h1. Schema : ", srcDB.DBName)
 
 		// set table list table.
-		out.Println("h3. Tables\n")
+		out.Printf("h3. Tables\n")
 		out.Println("||name||comments||")
 
 		var srcTables []*Table
@@ -263,34 +269,38 @@ func MakeDoc(srcDB *DB, conf *Config) {
 
 			srcTables = append(srcTables, srcTable)
 		}
+		out.Printf("\\\\")
 		out.Printf("\n\n----\n")
 
 		// set view list table.
-		out.Println("h3. Views\n")
+		out.Printf("h3. Views\n")
 		out.Println("||name||")
 
 		for _, v := range srcViewNames {
 			out.Printf("|[%s|#%s]|\n", v, WikiReplace(v))
 		}
+		out.Printf("\\\\")
 		out.Printf("\n\n----\n")
 
 		// set function list.
 		// set table list table.
-		out.Println("h3. Functions\n")
+		out.Printf("h3. Functions\n")
 		out.Println("||name||comments||")
 
 		for _, f := range srcFunctionNames {
 			out.Printf("|[%s|#%s]|%s |\n", f, WikiReplace(f), srcDB.GetObjectComments(FUNCTION, f))
 		}
+		out.Printf("\\\\")
 		out.Printf("\n\n----\n")
 
 		// set procedure list.
-		out.Println("h3. Procedures\n")
+		out.Printf("h3. Procedures\n")
 		out.Println("||name||comments||")
 
 		for _, p := range srcProcedureNames {
 			out.Printf("|[%s|#%s]|%s |\n", p, WikiReplace(p), srcDB.GetObjectComments(PROCEDURE, p))
 		}
+		out.Printf("\\\\")
 		out.Printf("\n\n----\n")
 		out.Printf("\n\n----\n")
 
@@ -304,28 +314,29 @@ func MakeDoc(srcDB *DB, conf *Config) {
 				out.Printf("Collation : %s\\\\", srcTable.Collation)
 
 				// print column..
-				out.Println("\nh5. Columns\n")
+				out.Printf("\nh5. Columns\n")
 				out.Println("||name||type||null||default||extra||comment||")
 				for i := 0; i < len(srcTable.Cols); i++ {
 					col := srcTable.GetColumn(i)
-					out.Printf("|%s|%s|%s |%s |%s |%s |\n", col.Name, col.Type, col.Null, col.Default, col.Extra, col.Comment)
+					out.Printf("| %s | %s | %s | %s | %s | %s |\n", col.Name, col.Type, col.Null, col.Default, col.Extra, col.Comment)
 				}
 				// print index.
-				out.Println("\nh5. Indexs\n")
+				out.Printf("\nh5. Indexs\n")
 				out.Println("||name||columns||isnull||")
 				for _, idx := range srcTable.Indexs {
-					out.Printf("|%s|%s |%t |\n", idx.Name, strings.Join(idx.Cols, ","), idx.IsUnique)
+					out.Printf("| %s | %s | %t |\n", idx.Name, strings.Join(idx.Cols, ","), idx.IsUnique)
 				}
-				out.Println("\nh5. Create Script\n")
-				out.Println("{code}")
+				out.Printf("\nh5. Create Script\n")
+				out.Println("{code:theme=RDark|language=SQL}")
 				script, err := srcDB.GetScript(TABLE, srcTable.Name)
 				if err != nil {
 					log.Fatal(err)
 				}
 				out.Println(script)
-				out.Printf("{code}\n")
+				out.Println("{code}")
 				out.Println("[goto table list...|#Tables]")
-				out.Printf("\n\n")
+				out.Printf("\\\\")
+				out.Printf("\n\n----\n")
 			}
 		}
 
@@ -333,8 +344,8 @@ func MakeDoc(srcDB *DB, conf *Config) {
 		{
 			for _, v := range srcViewNames {
 				out.Printf("h3. %s\n\n\n", v)
-				out.Println("\nh5. Create Script\n")
-				out.Println("{code}")
+				out.Printf("\nh5. Create Script\n")
+				out.Println("{code:theme=RDark|language=SQL}")
 				script, err := srcDB.GetScript(VIEW, v)
 				if err != nil {
 					log.Fatal(err)
@@ -342,7 +353,7 @@ func MakeDoc(srcDB *DB, conf *Config) {
 				out.Println(script)
 				out.Printf("{code}\n")
 				out.Println("[goto view list...|#Views]")
-				out.Printf("\n\n")
+				out.Printf("\n\n----\n")
 			}
 		}
 
@@ -351,8 +362,8 @@ func MakeDoc(srcDB *DB, conf *Config) {
 			for _, f := range srcFunctionNames {
 				out.Printf("h3. %s\n", f)
 				out.Printf("bq. Comment : %s  \n\n\n", srcDB.GetObjectComments(FUNCTION, f))
-				out.Println("\nh5. Create Script\n")
-				out.Println("{code}")
+				out.Printf("\nh5. Create Script\n")
+				out.Println("{code:theme=RDark|language=SQL}")
 				script, err := srcDB.GetScript(FUNCTION, f)
 				if err != nil {
 					log.Fatal(err)
@@ -360,7 +371,7 @@ func MakeDoc(srcDB *DB, conf *Config) {
 				out.Println(script)
 				out.Printf("{code}\n")
 				out.Println("[goto function list...|#Functions]")
-				out.Printf("\n\n")
+				out.Printf("\n\n----\n")
 			}
 		}
 
@@ -369,8 +380,8 @@ func MakeDoc(srcDB *DB, conf *Config) {
 			for _, p := range srcProcedureNames {
 				out.Printf("h3. %s\n", p)
 				out.Printf("bq. Comment : %s  \n\n\n", srcDB.GetObjectComments(PROCEDURE, p))
-				out.Println("\nh5. Create Script\n")
-				out.Println("{code}")
+				out.Printf("\nh5. Create Script\n")
+				out.Println("{code:theme=RDark|language=SQL}")
 				script, err := srcDB.GetScript(PROCEDURE, p)
 				if err != nil {
 					log.Fatal(err)
@@ -378,7 +389,7 @@ func MakeDoc(srcDB *DB, conf *Config) {
 				out.Println(script)
 				out.Printf("{code}\n")
 				out.Println("[goto procedure list...|#Procedures]")
-				out.Printf("\n\n")
+				out.Printf("\n\n----\n")
 			}
 		}
 	} else {

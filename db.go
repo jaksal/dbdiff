@@ -150,7 +150,8 @@ func (d *DB) GetData(query string, columns map[string]*Column) ([]*Row, error) {
 }
 
 var reg1 = regexp.MustCompile("DEFINER=[^ ]* ")
-var reg2 = regexp.MustCompile("ENGINE=[^ ]* ")
+
+// var reg2 = regexp.MustCompile("ENGINE=[^ ]* ")
 var reg3 = regexp.MustCompile("AUTO_INCREMENT=[^ ]* ")
 var reg4 = regexp.MustCompile("DEFAULT CHARSET=[^ ]* ")
 var reg5 = regexp.MustCompile("ALGORITHM=[^ ]* ")
@@ -207,7 +208,7 @@ func (d *DB) GetScript(objectType ObjectType, objectName string) (string, error)
 	case PROCEDURE:
 		result = data[0].Get("Create Procedure").(string)
 	case TRIGGER:
-		result = data[0].Get("Create Trigger").(string)
+		result = data[0].Get("SQL Original Statement").(string)
 	}
 
 	//log.Println(result)
@@ -277,14 +278,14 @@ func (d *DB) GetObjectList(objectType ObjectType, include string, exclude string
 		}
 
 		bIgnore := false
-		if include != "" && strings.Contains(strings.ToLower(name), include) == false {
+		if include != "" && !strings.Contains(strings.ToLower(name), include) {
 			bIgnore = true
 		}
-		if exclude != "" && strings.Contains(strings.ToLower(name), exclude) == true {
+		if exclude != "" && strings.Contains(strings.ToLower(name), exclude) {
 			bIgnore = true
 		}
 
-		if bIgnore == false {
+		if !bIgnore {
 			result = append(result, name)
 		}
 	}
@@ -310,7 +311,7 @@ func (d *DB) GetTableList(include string, exclude string) (map[string]*Table, er
 
 // GetScriptList get script info list.
 func (d *DB) GetScriptList(objectType ObjectType, include string, exclude string) (map[string]string, error) {
-	scriptNames, err := d.GetObjectList(objectType, include, include)
+	scriptNames, err := d.GetObjectList(objectType, include, exclude)
 	if err != nil {
 		return nil, err
 	}

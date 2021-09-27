@@ -26,7 +26,7 @@ type Config struct {
 	Target       string `json:"target"`
 	DiffType     string `json:"diff_type"`
 	Include      string `json:"include"`
-	Exclude      string `json:"exlude"`
+	Exclude      string `json:"exclude"`
 	Output       string `json:"output"`
 	IgnoreColumn string `json:"ignore_column"`
 }
@@ -59,7 +59,7 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	if config.IsValid() == false {
+	if !config.IsValid() {
 		return nil, errors.New("config file is invalid")
 	}
 

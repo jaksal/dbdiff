@@ -41,7 +41,7 @@ func (c *Column) compare(dst *Column) bool {
 func (c *Column) GetSQL() string {
 	var result string
 
-	result =  "`" + c.Name + "`" + " " + c.Type
+	result = "`" + c.Name + "` " + c.Type
 	if c.Null == "YES" {
 		result += " NULL"
 	} else {
@@ -81,10 +81,7 @@ func (i *Index) compare(dst *Index) bool {
 			return false
 		}
 	}
-	if i.IsUnique != dst.IsUnique {
-		return false
-	}
-	return true
+	return i.IsUnique == dst.IsUnique
 }
 
 func (i *Index) getAddSQL() string {
@@ -103,7 +100,7 @@ func (i *Index) getAddSQL() string {
 		if i > 0 {
 			result += ","
 		}
-		result += c
+		result += "`" + c + "`"
 	}
 
 	return result + ")"
@@ -211,7 +208,7 @@ func (d *DB) GetTableInfo(name string) *Table {
 				Extra:   c.Get("Extra").(string),
 				Comment: c.Get("Comment").(string),
 			}
-			
+
 			// 컬럼 타입이 숫자일 경우 int(10) -> int 로 변경.
 			// DB 버전에 따라 다르게 보이는 이슈.
 			// zerofill 옵션이 아닐경우에는 int 로 통일.
@@ -225,7 +222,7 @@ func (d *DB) GetTableInfo(name string) *Table {
 				strings.HasPrefix(col.Type, "decimal") {
 				col.Type = strings.Split(col.Type, "(")[0]
 			}
-			
+
 			result.Cols[col.Name] = col
 			idx++
 		}
@@ -270,7 +267,7 @@ func (t *Table) getBeforeColumn(idx int) string {
 	if idx == 0 {
 		return " FIRST"
 	}
-	return " AFTER " + t.GetColumn(idx-1).Name
+	return " AFTER `" + t.GetColumn(idx-1).Name + "`"
 }
 
 func (t *Table) compare(d *Table) string {
@@ -284,7 +281,7 @@ func (t *Table) compare(d *Table) string {
 	for i := 0; i < len(d.Cols); i++ {
 		dc := d.GetColumn(i)
 		if _, exist := t.Cols[dc.Name]; !exist {
-			sql := "DROP COLUMN " + dc.Name
+			sql := "DROP COLUMN `" + dc.Name + "`"
 			updates = append(updates, sql)
 
 			dc.flag = 1
@@ -374,7 +371,7 @@ func (t *Table) compare(d *Table) string {
 			updates = append(updates, sql)
 		} else if sc.flag == 3 || sc.flag == 4 {
 			// update
-			sql := fmt.Sprintf("CHANGE COLUMN %s %s", sc.Name, sc.GetSQL()) + t.getBeforeColumn(sc.Idx)
+			sql := fmt.Sprintf("CHANGE COLUMN `%s` %s", sc.Name, sc.GetSQL()) + t.getBeforeColumn(sc.Idx)
 			updates = append(updates, sql)
 		}
 	}
@@ -394,12 +391,12 @@ func (t *Table) compare(d *Table) string {
 			d.flag = true
 		}
 		for _, s := range t.Indexs {
-			if s.flag != true {
+			if !s.flag {
 				updates = append(updates, s.getAddSQL())
 			}
 		}
 		for _, s := range d.Indexs {
-			if s.flag != true {
+			if !s.flag {
 				updates = append(updates, s.getDropSQL())
 			}
 		}
